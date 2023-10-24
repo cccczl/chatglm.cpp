@@ -12,7 +12,7 @@ class Pipeline(_C.Pipeline):
     def __init__(self, model_path: str, *, dtype: Optional[str] = None) -> None:
         if Path(model_path).is_file():
             # load ggml model
-            super().__init__(str(model_path))
+            super().__init__(model_path)
         else:
             # convert hf model to ggml format
             from chatglm_cpp.convert import convert
@@ -109,7 +109,7 @@ class Pipeline(_C.Pipeline):
         return generate_fn(input_ids=input_ids, gen_config=gen_config)
 
     def _stream_generate(self, input_ids: List[int], gen_config: _C.GenerationConfig) -> Iterator[str]:
-        input_ids = [x for x in input_ids]  # make a copy
+        input_ids = list(input_ids)
         n_past = 0
         n_ctx = len(input_ids)
 
@@ -127,9 +127,7 @@ class Pipeline(_C.Pipeline):
                 yield output[print_len:]
                 token_cache = []
                 print_len = 0
-            elif output.endswith((",", "!", ":", ";", "?", "�")):
-                pass
-            else:
+            elif not output.endswith((",", "!", ":", ";", "?", "�")):
                 yield output[print_len:]
                 print_len = len(output)
 
@@ -140,7 +138,7 @@ class Pipeline(_C.Pipeline):
         yield output[print_len:]
 
     def _sync_generate(self, input_ids: List[int], gen_config: _C.GenerationConfig) -> str:
-        input_ids = [x for x in input_ids]  # make a copy
+        input_ids = list(input_ids)
         n_past = 0
         n_ctx = len(input_ids)
 
@@ -151,8 +149,7 @@ class Pipeline(_C.Pipeline):
             if next_token_id == self.model.config.eos_token_id:
                 break
 
-        output = self.tokenizer.decode(input_ids[n_ctx:])
-        return output
+        return self.tokenizer.decode(input_ids[n_ctx:])
 
     def stream_chat(
         self,

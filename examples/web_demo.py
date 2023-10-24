@@ -25,9 +25,7 @@ pipeline = chatglm_cpp.Pipeline(args.model)
 
 
 def postprocess(text):
-    if args.plain:
-        return f"<pre>{text}</pre>"
-    return text
+    return f"<pre>{text}</pre>" if args.plain else text
 
 
 def predict(input, chatbot, max_length, top_p, temperature, history):

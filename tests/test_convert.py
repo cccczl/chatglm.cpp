@@ -504,7 +504,7 @@ def make_internlm_model():
 
     print(m)
 
-    with open(HERE / f"data/internlm_model.data", "wb") as f:
+    with open(HERE / "data/internlm_model.data", "wb") as f:
         m.embed_tokens.weight.data.numpy().tofile(f)
         m.layers[0].input_layernorm.weight.data.numpy().tofile(f)
         qkv_proj = torch.cat(
